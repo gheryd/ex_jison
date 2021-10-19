@@ -14,16 +14,28 @@
 %%
 expressione
     : DOLLAR contenuto
-        {return {contenuto: $1}; }
+        {return {contenuto: $2}; }
     ;
 
 contenuto
     : DOT_DOT parentesi
-        { $$ = {type: "doppio punto", child: $3 } }
+        { $$ = {type: "doppio punto", child: $2 }; }
     ;
 
 parentesi
-    : OPEN_BRACKET NUMBER CLOSE_BRACKET
-        { $$ = {type: "content bracket", num: $2} }
+    : OPEN_BRACKET cont_parentesi CLOSE_BRACKET
+        { $$ = {type: "square bracket", content: $2}; }
+    ;
+
+cont_parentesi
+    : NUMBER op NUMBER
+        { $$ = {op: $2, args:[$1, $3]}; }
+    ;
+
+op
+    : OR
+        { $$ = 'OR';}
+    | AND
+        { $$ = 'AND';}
     ;
 
