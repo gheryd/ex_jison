@@ -1,1 +1,1 @@
-jison jsonpath.jison  && node runtest.js
+# jison jsonpath.jison  && node runtest.js
