@@ -3,8 +3,10 @@
 "$" return "DOLLAR"
 ".." return "DOT_DOT"
 "." return "DOT"
-"[" return "OPEN_BRACKET"
-"]" return "CLOSE_BRACKET"
+"[" return "OPEN_SQUARE_BRACKET"
+"]" return "CLOSE_SQUARE_BRACKET"
+"(" return "OPEN_ROUND_BRACKET"
+")" return "CLOSE_ROUND_BRACKET"
 [0-9]+\b return "NUMBER"
 "||" return "OR"
 "&&" return "AND"
@@ -18,21 +20,21 @@ expressione
     ;
 
 contenuto
-    : DOT_DOT parentesi
-        { $$ = {type: "doppio punto", child: $2 }; }
+    : DOT_DOT parentesi_quadre
+        { $$ = {type: "doppio punto", args: [$2] }; }
     ;
 
-parentesi
-    : OPEN_BRACKET cont_parentesi CLOSE_BRACKET
+parentesi_quadre
+    : OPEN_SQUARE_BRACKET expr_bool CLOSE_SQUARE_BRACKET
         { $$ = {type: "square bracket", content: $2}; }
     ;
 
-cont_parentesi
-    : NUMBER op NUMBER
-        { $$ = {op: $2, args:[$1, $3]}; }
+expr_bool
+    : par op_bool par
+        { $$ = {type: "op", value: $2, args:[$1, $3]}; }
     ;
 
-op
+op_bool
     : OR
         { $$ = 'OR';}
     | AND
@@ -41,4 +43,7 @@ op
 
 par
     : NUMBER
-        { $$ = $1}
+        { $$ = { type:'number', value:$1};}
+    | OPEN_ROUND_BRACKET expr_bool CLOSE_ROUND_BRACKET
+        { $$ = $2; }
+    ;
