@@ -10,21 +10,29 @@
 [0-9]+\b return "NUMBER"
 "||" return "OR"
 "&&" return "AND"
+\s+\b return "PROPERTY"
 /lex
 
 %start expressione
 %%
 expressione
-    : DOLLAR contenuto
-        {return {contenuto: $2}; }
+    : DOLLAR separator path
+        {return {type: "root", sep: $2, content: $3}; }
     ;
 
-contenuto
-    : DOT_DOT parentesi_quadre
-        { $$ = {type: "doppio punto", args: [$2] }; }
+separator
+    : DOT
+        { $$ = {type: "child"};}
+    | DOT_DOT
+        { $$ = {type: "recursive"};}
     ;
 
-parentesi_quadre
+path
+    : square_bracket
+        { $$ = $1; }
+    ;
+
+square_bracket
     : OPEN_SQUARE_BRACKET expr_bool CLOSE_SQUARE_BRACKET
         { $$ = {type: "square bracket", content: $2}; }
     ;
