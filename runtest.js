@@ -1,6 +1,6 @@
 const parser = require("./jsonpath").parser;
 
-const jsonpath = `$..[10&&((11&&15)||6)]`;
+const jsonpath = `$..[?(@.nodeA||(@.nodeB&&@.nodeB))]`;
 
 const parsed = parser.parse(jsonpath);
 

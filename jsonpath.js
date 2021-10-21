@@ -72,12 +72,12 @@
   }
 */
 var jsonpath = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,11],$V1=[1,12],$V2=[12,15,16,19],$V3=[17,18];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,16],$V1=[1,15],$V2=[1,18],$V3=[16,19,20],$V4=[14,21,23];
 var parser = {trace: function trace () { },
 yy: {},
-symbols_: {"error":2,"expressione":3,"DOLLAR":4,"separator":5,"path":6,"DOT":7,"DOT_DOT":8,"square_bracket":9,"OPEN_SQUARE_BRACKET":10,"expr_bool":11,"CLOSE_SQUARE_BRACKET":12,"par":13,"op_bool":14,"OR":15,"AND":16,"NUMBER":17,"OPEN_ROUND_BRACKET":18,"CLOSE_ROUND_BRACKET":19,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"DOLLAR",7:"DOT",8:"DOT_DOT",10:"OPEN_SQUARE_BRACKET",12:"CLOSE_SQUARE_BRACKET",15:"OR",16:"AND",17:"NUMBER",18:"OPEN_ROUND_BRACKET",19:"CLOSE_ROUND_BRACKET"},
-productions_: [0,[3,3],[5,1],[5,1],[6,1],[9,3],[11,3],[14,1],[14,1],[13,1],[13,3]],
+symbols_: {"error":2,"expressione":3,"DOLLAR":4,"separator":5,"path":6,"DOT":7,"DOT_DOT":8,"square_bracket":9,"OPEN_SQUARE_BRACKET":10,"filter":11,"CLOSE_SQUARE_BRACKET":12,"QUESTION_MARK":13,"OPEN_ROUND_BRACKET":14,"filter_expr":15,"CLOSE_ROUND_BRACKET":16,"par":17,"op_bool":18,"OR":19,"AND":20,"NUMBER":21,"selector":22,"AT":23,"ALPHABETICAL":24,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"DOLLAR",7:"DOT",8:"DOT_DOT",10:"OPEN_SQUARE_BRACKET",12:"CLOSE_SQUARE_BRACKET",13:"QUESTION_MARK",14:"OPEN_ROUND_BRACKET",16:"CLOSE_ROUND_BRACKET",19:"OR",20:"AND",21:"NUMBER",23:"AT",24:"ALPHABETICAL"},
+productions_: [0,[3,3],[5,1],[5,1],[6,1],[9,3],[11,4],[15,3],[15,1],[18,1],[18,1],[17,1],[17,3],[17,1],[22,3]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -92,31 +92,40 @@ break;
 case 3:
  this.$ = {type: "recursive"};
 break;
-case 4:
+case 4: case 8:
  this.$ = $$[$0]; 
 break;
 case 5:
  this.$ = {type: "square bracket", content: $$[$0-1]}; 
 break;
 case 6:
- this.$ = {type: "op", value: $$[$0-1], args:[$$[$0-2], $$[$0]]}; 
+ this.$ = {type: "filter", expr: $$[$0-1]} 
 break;
 case 7:
- this.$ = 'OR';
-break;
-case 8:
- this.$ = 'AND';
+ this.$ = {type: "op", value: $$[$0-1], args:[$$[$0-2], $$[$0]]}; 
 break;
 case 9:
- this.$ = { type:'number', value:$$[$0]};
+ this.$ = 'OR';
 break;
 case 10:
+ this.$ = 'AND';
+break;
+case 11:
+ this.$ = { type:'number', value:$$[$0]};
+break;
+case 12:
  this.$ = $$[$0-1]; 
+break;
+case 13:
+ this.$ = $$[$0] 
+break;
+case 14:
+ this.$ = {type: "selector", value:$$[$0]} 
 break;
 }
 },
-table: [{3:1,4:[1,2]},{1:[3]},{5:3,7:[1,4],8:[1,5]},{6:6,9:7,10:[1,8]},{10:[2,2]},{10:[2,3]},{1:[2,1]},{1:[2,4]},{11:9,13:10,17:$V0,18:$V1},{12:[1,13]},{14:14,15:[1,15],16:[1,16]},o($V2,[2,9]),{11:17,13:10,17:$V0,18:$V1},{1:[2,5]},{13:18,17:$V0,18:$V1},o($V3,[2,7]),o($V3,[2,8]),{19:[1,19]},o([12,19],[2,6]),o($V2,[2,10])],
-defaultActions: {4:[2,2],5:[2,3],6:[2,1],7:[2,4],13:[2,5]},
+table: [{3:1,4:[1,2]},{1:[3]},{5:3,7:[1,4],8:[1,5]},{6:6,9:7,10:[1,8]},{10:[2,2]},{10:[2,3]},{1:[2,1]},{1:[2,4]},{11:9,13:[1,10]},{12:[1,11]},{14:[1,12]},{1:[2,5]},{14:$V0,15:13,17:14,21:$V1,22:17,23:$V2},{16:[1,19]},{16:[2,8],18:20,19:[1,21],20:[1,22]},o($V3,[2,11]),{14:$V0,15:23,17:14,21:$V1,22:17,23:$V2},o($V3,[2,13]),{7:[1,24]},{12:[2,6]},{14:$V0,17:25,21:$V1,22:17,23:$V2},o($V4,[2,9]),o($V4,[2,10]),{16:[1,26]},{24:[1,27]},{16:[2,7]},o($V3,[2,12]),o($V3,[2,14])],
+defaultActions: {4:[2,2],5:[2,3],6:[2,1],7:[2,4],11:[2,5],19:[2,6],25:[2,7]},
 parseError: function parseError (str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -611,12 +620,20 @@ case 8:return "OR"
 break;
 case 9:return "AND"
 break;
-case 10:return "PROPERTY"
+case 10:return "QUESTION_MARK" 
+break;
+case 11:return "OPEN_ROUND_BRACKET"
+break;
+case 12:return "CLOSE_RUOUND_BRACKET"
+break;
+case 13:return "AT"
+break;
+case 14:return "ALPHABETICAL"
 break;
 }
 },
-rules: [/^(?:\$)/,/^(?:\.\.)/,/^(?:\.)/,/^(?:\[)/,/^(?:\])/,/^(?:\()/,/^(?:\))/,/^(?:[0-9]+\b)/,/^(?:\|\|)/,/^(?:&&)/,/^(?:\s+\b)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10],"inclusive":true}}
+rules: [/^(?:\$)/,/^(?:\.\.)/,/^(?:\.)/,/^(?:\[)/,/^(?:\])/,/^(?:\()/,/^(?:\))/,/^(?:[0-9]+\b)/,/^(?:\|\|)/,/^(?:&&)/,/^(?:\?)/,/^(?:\()/,/^(?:\))/,/^(?:@)/,/^(?:[a-zA-Z]+\b)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14],"inclusive":true}}
 });
 return lexer;
 })();

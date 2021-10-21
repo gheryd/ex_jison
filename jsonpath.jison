@@ -10,7 +10,11 @@
 [0-9]+\b return "NUMBER"
 "||" return "OR"
 "&&" return "AND"
-\s+\b return "PROPERTY"
+"?" return "QUESTION_MARK" 
+"(" return "OPEN_ROUND_BRACKET"
+")" return "CLOSE_RUOUND_BRACKET"
+"@" return "AT"
+[a-zA-Z]+\b return "ALPHABETICAL"
 /lex
 
 %start expressione
@@ -33,13 +37,20 @@ path
     ;
 
 square_bracket
-    : OPEN_SQUARE_BRACKET expr_bool CLOSE_SQUARE_BRACKET
+    : OPEN_SQUARE_BRACKET filter CLOSE_SQUARE_BRACKET
         { $$ = {type: "square bracket", content: $2}; }
     ;
 
-expr_bool
+filter
+    : QUESTION_MARK OPEN_ROUND_BRACKET filter_expr CLOSE_ROUND_BRACKET
+        { $$ = {type: "filter", expr: $3} }
+    ;
+
+filter_expr
     : par op_bool par
         { $$ = {type: "op", value: $2, args:[$1, $3]}; }
+    | par
+        { $$ = $1; }
     ;
 
 op_bool
@@ -52,6 +63,13 @@ op_bool
 par
     : NUMBER
         { $$ = { type:'number', value:$1};}
-    | OPEN_ROUND_BRACKET expr_bool CLOSE_ROUND_BRACKET
+    | OPEN_ROUND_BRACKET filter_expr CLOSE_ROUND_BRACKET
         { $$ = $2; }
+    | selector
+        { $$ = $1 }
+    ;
+
+selector
+    : AT DOT ALPHABETICAL
+        { $$ = {type: "selector", value:$3} }
     ;
