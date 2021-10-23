@@ -72,12 +72,12 @@
   }
 */
 var jsonpath = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,6],$V1=[1,7],$V2=[1,23,25],$V3=[1,17],$V4=[1,19],$V5=[1,21],$V6=[1,22],$V7=[1,24],$V8=[1,25],$V9=[14,17,18];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,6],$V1=[1,7],$V2=[1,20,21],$V3=[1,17],$V4=[1,20],$V5=[1,21],$V6=[1,22],$V7=[1,24],$V8=[1,25],$V9=[14,17,18],$Va=[14,17,18,23,24,25,26,27];
 var parser = {trace: function trace () { },
 yy: {},
-symbols_: {"error":2,"jsonpath":3,"$":4,"paths":5,"path":6,"sep":7,"PROPERTY":8,"filter":9,"[":10,"?":11,"(":12,"expr":13,")":14,"]":15,"*":16,"OR":17,"AND":18,"par":19,"NUMBER":20,"selector":21,"AT":22,".":23,"SKIPME":24,"..":25,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"$",8:"PROPERTY",10:"[",11:"?",12:"(",14:")",15:"]",16:"*",17:"OR",18:"AND",20:"NUMBER",22:"AT",23:".",24:"SKIPME",25:".."},
-productions_: [0,[3,2],[3,1],[5,2],[5,1],[6,3],[6,2],[9,6],[9,3],[13,3],[13,3],[13,3],[13,1],[19,1],[19,1],[21,3],[21,4],[7,1],[7,1]],
+symbols_: {"error":2,"jsonpath":3,"$":4,"paths":5,"path":6,"sep":7,"NODE":8,"filter":9,"[":10,"?":11,"(":12,"expr":13,")":14,"]":15,"*":16,"OR":17,"AND":18,"compare":19,".":20,"..":21,"value":22,"==":23,">":24,"<":25,">=":26,"<=":27,"NUMBER":28,"AT":29,"STRING":30,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"$",8:"NODE",10:"[",11:"?",12:"(",14:")",15:"]",16:"*",17:"OR",18:"AND",20:".",21:"..",23:"==",24:">",25:"<",26:">=",27:"<=",28:"NUMBER",29:"AT",30:"STRING"},
+productions_: [0,[3,2],[3,1],[5,2],[5,1],[6,3],[6,2],[9,6],[9,3],[13,3],[13,3],[13,3],[13,1],[7,1],[7,1],[19,3],[19,3],[19,3],[19,3],[19,3],[19,1],[22,1],[22,3],[22,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -96,38 +96,32 @@ case 4:
  this.$ = [$$[$0]];
 break;
 case 5:
- this.$ = {sep: $$[$0-2], prop: $$[$0-1], filter: $$[$0]}; 
+ this.$ =   {type:'path', sep: $$[$0-2], node: $$[$0-1], filter: $$[$0]}  
 break;
 case 6:
- this.$ = {sep: $$[$0-1], prop: $$[$0]};
+ this.$ = {type: 'path',sep: $$[$0-1], node: $$[$0]};
 break;
 case 7:
  this.$ = $$[$0-2] 
 break;
 case 8:
- this.$ = {type: 'all'} 
+ this.$ = null 
 break;
 case 9:
  this.$ = (function(e1, e2){
-                console.log("-------------------------------------------------------------------");
-                console.log("OR!", e1,e2);
                 const isOrOp = (e) => e.type=='expr_bool' && e.op=='OR' && !e.priority;
                 const isExpr = e => e.type!='exp_bool';
                 if(isOrOp(e1) && isOrOp(e2)){
                     e1.args = [...e1.args, ...e2.args];
-                    console.log("e1 and e2 is OR, merge args", e1);
                     return e1;
                 }else if(isOrOp(e1) && isExpr(e2)) {
                     e1.args.push(e2);
-                    console.log("e1 is OR and e2 is expr, add e2 to e1.args", e1);
                     return e1;
                 }else if(isExpr(e1) && isOrOp(e2)){
                     e2.args.push(e1);
-                    console.log("e2 is OR and e1 is expr, add e1 to e2.args", e1);
                     return e2;
                 }else {
-                    console.log("nested");
-                return {type:'expr_bool', op:'OR', args:[$$[$0-2], $$[$0]]};
+                    return {type:'expr_bool', op:'OR', args:[$$[$0-2], $$[$0]]};
                 }  
                 
             })($$[$0-2], $$[$0]) 
@@ -135,28 +129,22 @@ case 9:
 break;
 case 10:
  this.$ = (function(e1, e2){
-                console.log("-------------------------------------------------------------------");
-                console.log("AND!", e1,e2);
                 const isAndExpr = (e) => e.type=='expr_bool' && e.op=='AND' && !e.priority;
                 const isExpr = e => e.type!='exp_bool';
                 if(isAndExpr(e1) && isAndExpr(e2)){
                     e1.args = [...e1.args, ...e2.args];
-                    console.log("e1 and e2 is AND, merge args", e1);
                     return e1;
                 }else if(isAndExpr(e1) && isExpr(e2)) {
                     e1.args.push(e2);
-                    console.log("e1 is AND and e2 is expr, add e2 to e1.args", e1);
                     return e1;
                 }else if(isExpr(e1) && isAndExpr(e2)){
                     e2.args.push(e1);
-                    console.log("e2 is AND and e1 is expr, add e1 to e2.args", e1);
                     return e2;
                 }else {
-                    console.log("nested");
-                return {type:'expr_bool', op:'AND', args:[$$[$0-2], $$[$0]]};
+                    return {type:'expr_bool', op:'AND', args:[$$[$0-2], $$[$0]]};
                 }  
                 
-            })($$[$0-2], $$[$0]) 
+            })($$[$0-2], $$[$0]);
         
 break;
 case 11:
@@ -166,27 +154,27 @@ case 12:
  this.$ = $$[$0]; 
 break;
 case 13:
- this.$ = { type:'number', value:$$[$0]};
+ this.$ = '.';
 break;
 case 14:
- this.$ = $$[$0] 
+ this.$ = '..';
 break;
-case 15:
- this.$ = {type: 'selector', value:$$[$0]} 
+case 15: case 16: case 17: case 18: case 19:
+ this.$ = { op: 'compare', compare: $$[$0-1], args:[$$[$0-2], $$[$0]] }; 
 break;
-case 16:
- this.$ = {type: 'selector', value:$$[$0-1]} 
+case 21:
+ this.$ = {type: "number", value: $$[$0]}; 
 break;
-case 17:
- this.$ = 'child';
+case 22:
+ this.$ = {type: 'node', value: $$[$0]} 
 break;
-case 18:
- this.$ = 'recursive';
+case 23:
+ this.$ = {type: "string", value: $$[$0]};
 break;
 }
 },
-table: [{3:1,4:[1,2]},{1:[3]},{1:[2,2],5:3,6:4,7:5,23:$V0,25:$V1},{1:[2,1]},{1:[2,4],5:8,6:4,7:5,23:$V0,25:$V1},{8:[1,9]},{8:[2,17]},{8:[2,18]},{1:[2,3]},o($V2,[2,6],{9:10,10:[1,11]}),o($V2,[2,5]),{11:[1,12],16:[1,13]},{12:[1,14]},{15:[1,15]},{12:$V3,13:16,19:18,20:$V4,21:20,22:$V5,24:$V6},o($V2,[2,8]),{14:[1,23],17:$V7,18:$V8},{12:$V3,13:26,19:18,20:$V4,21:20,22:$V5,24:$V6},o($V9,[2,12]),o($V9,[2,13]),o($V9,[2,14]),{23:[1,27]},{22:[1,28]},{15:[1,29]},{12:$V3,13:30,19:18,20:$V4,21:20,22:$V5,24:$V6},{12:$V3,13:31,19:18,20:$V4,21:20,22:$V5,24:$V6},{14:[1,32],17:$V7,18:$V8},{8:[1,33]},{23:[1,34]},o($V2,[2,7]),o($V9,[2,9]),o([14,18],[2,10],{17:$V7}),o($V9,[2,11]),o($V9,[2,15]),{8:[1,35]},o($V9,[2,16])],
-defaultActions: {3:[2,1],6:[2,17],7:[2,18],8:[2,3]},
+table: [{3:1,4:[1,2]},{1:[3]},{1:[2,2],5:3,6:4,7:5,20:$V0,21:$V1},{1:[2,1]},{1:[2,4],5:8,6:4,7:5,20:$V0,21:$V1},{8:[1,9]},{8:[2,13]},{8:[2,14]},{1:[2,3]},o($V2,[2,6],{9:10,10:[1,11]}),o($V2,[2,5]),{11:[1,12],16:[1,13]},{12:[1,14]},{15:[1,15]},{12:$V3,13:16,19:18,22:19,28:$V4,29:$V5,30:$V6},o($V2,[2,8]),{14:[1,23],17:$V7,18:$V8},{12:$V3,13:26,19:18,22:19,28:$V4,29:$V5,30:$V6},o($V9,[2,12]),o($V9,[2,20],{23:[1,27],24:[1,28],25:[1,29],26:[1,30],27:[1,31]}),o($Va,[2,21]),{20:[1,32]},o($Va,[2,23]),{15:[1,33]},{12:$V3,13:34,19:18,22:19,28:$V4,29:$V5,30:$V6},{12:$V3,13:35,19:18,22:19,28:$V4,29:$V5,30:$V6},{14:[1,36],17:$V7,18:$V8},{22:37,28:$V4,29:$V5,30:$V6},{22:38,28:$V4,29:$V5,30:$V6},{22:39,28:$V4,29:$V5,30:$V6},{22:40,28:$V4,29:$V5,30:$V6},{22:41,28:$V4,29:$V5,30:$V6},{8:[1,42]},o($V2,[2,7]),o($V9,[2,9]),o([14,18],[2,10],{17:$V7}),o($V9,[2,11]),o($V9,[2,15]),o($V9,[2,16]),o($V9,[2,17]),o($V9,[2,18]),o($V9,[2,19]),o($Va,[2,22])],
+defaultActions: {3:[2,1],6:[2,13],7:[2,14],8:[2,3]},
 parseError: function parseError (str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -661,44 +649,60 @@ options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return "$"
+case 0:/* skip whitespace */
 break;
-case 1:return ".."
+case 1:return "$"
 break;
-case 2:return "."
+case 2:return ".."
 break;
-case 3:return "["
+case 3:return "."
 break;
-case 4:return "]"
+case 4:return "["
 break;
-case 5:return "("
+case 5:return "]"
 break;
-case 6:return ")"
+case 6:return "("
 break;
-case 7:return "NUMBER"
+case 7:return ")"
 break;
-case 8:return "OR"
+case 8:return "NUMBER"
 break;
-case 9:return "AND"
+case 9:return "OR"
 break;
-case 10:return "?" 
+case 10:return "AND"
 break;
-case 11:return "("
+case 11:return "?" 
 break;
-case 12:return ")"
+case 12:return "("
 break;
-case 13:return "AT"
+case 13:return ")"
 break;
-case 14:return "*"
+case 14:return "AT"
 break;
-case 15:return "PROPERTY"
+case 15:return "*"
 break;
-case 16:return "SKIPME"
+case 16:return "NODE"
+break;
+case 17:return "true"
+break;
+case 18:return "false"
+break;
+case 19:return "<"
+break;
+case 20:return ">"
+break;
+case 21:return "<="
+break;
+case 22:return ">="
+break;
+case 23:return "=="
+break;
+case 24:return "STRING"
 break;
 }
 },
-rules: [/^(?:\$)/,/^(?:\.\.)/,/^(?:\.)/,/^(?:\[)/,/^(?:\])/,/^(?:\()/,/^(?:\))/,/^(?:[0-9]+(\.[0-9]+)?\b)/,/^(?:\|\|)/,/^(?:&&)/,/^(?:\?)/,/^(?:\()/,/^(?:\))/,/^(?:@)/,/^(?:\*)/,/^(?:[a-zA-Z0-9]+\b)/,/^(?:\s+)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"inclusive":true}}
+rules: [/^(?:\s)/,/^(?:\$)/,/^(?:\.\.)/,/^(?:\.)/,/^(?:\[)/,/^(?:\])/,/^(?:\()/,/^(?:\))/,/^(?:[0-9]+(\.[0-9]+)?\b)/,/^(?:\|\|)/,/^(?:&&)/,/^(?:\?)/,/^(?:\()/,/^(?:\))/,/^(?:@)/,/^(?:\*)/,/^(?:[a-zA-Z0-9]+\b)/,/^(?:true\b)/,/^(?:false\b)/,/^(?:<)/,/^(?:>)/,/^(?:<=)/,/^(?:>=)/,/^(?:==)/,/^(?:'[a-zA-Z0-9\s]+')/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24],"inclusive":true}}
 });
 return lexer;
 })();

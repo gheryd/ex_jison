@@ -8,11 +8,16 @@ examples[++i] = `$.prop[?(@.nodeA||@.nodeB||@.nodeC)]`;
 examples[++i] = `$.prop[?(@.nodeA&&@.nodeB||@.nodeC||@.nodeD)]`,
 examples[++i] = `$.prop[?(@.nodeA||@.nodeB&&@.nodeC&&@.nodeD)]`;
 examples[++i] = `$.prop[?(@.nodeA&&@.nodeB||@.nodeC&&@.nodeD)]`;
-examples[++i] = `$.prop[?(@.nodeA&&@.nodeB||@.nodeC||@.nodeD)]`,
 examples[++i] =  `$..prop1[?(@.nodeA||@.nodeB&& @.nodeC)].prop2[*].prop3`;
 examples[++i] = `$..prop1[?(@.nodeA||@.nodeB&& @.nodeC)].prop2[?(@.prop4)].prop3`;
 
-const jsonpath = examples[5];
+examples[++i] =  `$.prop[?(@.nodeA)]`;
+examples[++i] =  `$.prop[?(@.nodeA>@.nodeB)]`;
+examples[++i] =  `$.prop[?(@.nodeA>10)]`;
+examples[++i] =  `$.prop[?(@.nodeA>10 && @.nodeB==@.nodeC)]`;
+examples[++i] =  `$.prop[?(@.nodeA>10 && @.nodeB=='ci ao a')].nodeC[*]`;
+
+const jsonpath = examples[12];
 
 const parsed = parser.parse(jsonpath);
 
