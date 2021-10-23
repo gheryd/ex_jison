@@ -1,36 +1,36 @@
 %lex
 %%
 
-"$" return "DOLLAR"
-".." return "DOT_DOT"
-"." return "DOT"
-"[" return "OPEN_SQUARE_BRACKET"
-"]" return "CLOSE_SQUARE_BRACKET"
-"(" return "OPEN_ROUND_BRACKET"
-")" return "CLOSE_ROUND_BRACKET"
+"$" return "$"
+".." return ".."
+"." return "."
+"[" return "["
+"]" return "]"
+"(" return "("
+")" return ")"
 [0-9]+("."[0-9]+)?\b return "NUMBER"
 "||" return "OR"
 "&&" return "AND"
-"?" return "QUESTION_MARK" 
-"(" return "OPEN_ROUND_BRACKET"
-")" return "CLOSE_RUOUND_BRACKET"
+"?" return "?" 
+"(" return "("
+")" return ")"
 "@" return "AT"
-"*" return "ASTERISK"
+"*" return "*"
 [a-zA-Z0-9]+\b return "PROPERTY"
 \s+ return "SKIPME"
 
 /lex
 
-%left OR
 %left AND
+%left OR
 
 %start jsonpath
 %%
 jsonpath
-    : DOLLAR paths
-        {return {type: "$", paths: $2}; }
-    | DOLLAR
-        {return {type: "$"}; }
+    : '$' paths
+        {return {paths: $paths}; }
+    | '$'
+        {return {paths: []}; }
     ;
 
 paths
@@ -50,45 +50,88 @@ path
     ;
 
 filter
-    : OPEN_SQUARE_BRACKET QUESTION_MARK OPEN_ROUND_BRACKET expr CLOSE_ROUND_BRACKET CLOSE_SQUARE_BRACKET
+    : '[' '?' '(' expr ')' ']'
         { $$ = $4 }
-    | OPEN_SQUARE_BRACKET ASTERISK CLOSE_SQUARE_BRACKET
-        { $$ = {type: "all"} }
+    | '[' '*' ']'
+        { $$ = {type: 'all'} }
     ;
 
 expr
-    : expr op_bool expr
-        { $$ = {type: "op", value: $2, args:[$1, $3]}; }
+    : expr OR expr
+        { $$ = (function(e1, e2){
+                console.log("-------------------------------------------------------------------");
+                console.log("OR!", e1,e2);
+                const isOrOp = (e) => e.type=='expr_bool' && e.op=='OR' && !e.priority;
+                const isExpr = e => e.type!='exp_bool';
+                if(isOrOp(e1) && isOrOp(e2)){
+                    e1.args = [...e1.args, ...e2.args];
+                    console.log("e1 and e2 is OR, merge args", e1);
+                    return e1;
+                }else if(isOrOp(e1) && isExpr(e2)) {
+                    e1.args.push(e2);
+                    console.log("e1 is OR and e2 is expr, add e2 to e1.args", e1);
+                    return e1;
+                }else if(isExpr(e1) && isOrOp(e2)){
+                    e2.args.push(e1);
+                    console.log("e2 is OR and e1 is expr, add e1 to e2.args", e1);
+                    return e2;
+                }else {
+                    console.log("nested");
+                return {type:'expr_bool', op:'OR', args:[$1, $3]};
+                }  
+                
+            })($1, $3) 
+        }
+    | expr AND expr
+        { $$ = (function(e1, e2){
+                console.log("-------------------------------------------------------------------");
+                console.log("AND!", e1,e2);
+                const isAndExpr = (e) => e.type=='expr_bool' && e.op=='AND' && !e.priority;
+                const isExpr = e => e.type!='exp_bool';
+                if(isAndExpr(e1) && isAndExpr(e2)){
+                    e1.args = [...e1.args, ...e2.args];
+                    console.log("e1 and e2 is AND, merge args", e1);
+                    return e1;
+                }else if(isAndExpr(e1) && isExpr(e2)) {
+                    e1.args.push(e2);
+                    console.log("e1 is AND and e2 is expr, add e2 to e1.args", e1);
+                    return e1;
+                }else if(isExpr(e1) && isAndExpr(e2)){
+                    e2.args.push(e1);
+                    console.log("e2 is AND and e1 is expr, add e1 to e2.args", e1);
+                    return e2;
+                }else {
+                    console.log("nested");
+                return {type:'expr_bool', op:'AND', args:[$1, $3]};
+                }  
+                
+            })($1, $3) 
+        }
+    | '(' expr ')'
+        { $$ = {...$expr, priority: true} }
     | par
         { $$ = $1; }
-    ;
-
-op_bool
-    : OR
-        { $$ = 'OR';}
-    | AND
-        { $$ = 'AND';}
     ;
 
 par
     : NUMBER
         { $$ = { type:'number', value:$1};}
-    //| OPEN_ROUND_BRACKET expr CLOSE_ROUND_BRACKET
+    //| '(' expr ')'
      //   { $$ = $2; }
     | selector
         { $$ = $1 }
     ;
 
 selector
-    : AT DOT PROPERTY
-        { $$ = {type: "selector", value:$3} }
-    | SKIPME AT DOT PROPERTY
-        { $$ = {type: "selector", value:$3} }
+    : AT '.' PROPERTY
+        { $$ = {type: 'selector', value:$3} }
+    | SKIPME AT '.' PROPERTY
+        { $$ = {type: 'selector', value:$3} }
     ;
 
 sep
-    : DOT
-        { $$ = "child";}
-    | DOT_DOT
-        { $$ = "recursive";}
+    : '.'
+        { $$ = 'child';}
+    | '..'
+        { $$ = 'recursive';}
     ;

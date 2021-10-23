@@ -72,22 +72,22 @@
   }
 */
 var jsonpath = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,6],$V1=[1,7],$V2=[1,24,26],$V3=[1,18],$V4=[1,20],$V5=[1,21],$V6=[1,24],$V7=[1,25],$V8=[14,19,20],$V9=[21,23,25];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,6],$V1=[1,7],$V2=[1,23,25],$V3=[1,17],$V4=[1,19],$V5=[1,21],$V6=[1,22],$V7=[1,24],$V8=[1,25],$V9=[14,17,18];
 var parser = {trace: function trace () { },
 yy: {},
-symbols_: {"error":2,"jsonpath":3,"DOLLAR":4,"paths":5,"path":6,"sep":7,"PROPERTY":8,"filter":9,"OPEN_SQUARE_BRACKET":10,"QUESTION_MARK":11,"OPEN_ROUND_BRACKET":12,"expr":13,"CLOSE_ROUND_BRACKET":14,"CLOSE_SQUARE_BRACKET":15,"ASTERISK":16,"op_bool":17,"par":18,"OR":19,"AND":20,"NUMBER":21,"selector":22,"AT":23,"DOT":24,"SKIPME":25,"DOT_DOT":26,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"DOLLAR",8:"PROPERTY",10:"OPEN_SQUARE_BRACKET",11:"QUESTION_MARK",12:"OPEN_ROUND_BRACKET",14:"CLOSE_ROUND_BRACKET",15:"CLOSE_SQUARE_BRACKET",16:"ASTERISK",19:"OR",20:"AND",21:"NUMBER",23:"AT",24:"DOT",25:"SKIPME",26:"DOT_DOT"},
-productions_: [0,[3,2],[3,1],[5,2],[5,1],[6,3],[6,2],[9,6],[9,3],[13,3],[13,1],[17,1],[17,1],[18,1],[18,1],[22,3],[22,4],[7,1],[7,1]],
+symbols_: {"error":2,"jsonpath":3,"$":4,"paths":5,"path":6,"sep":7,"PROPERTY":8,"filter":9,"[":10,"?":11,"(":12,"expr":13,")":14,"]":15,"*":16,"OR":17,"AND":18,"par":19,"NUMBER":20,"selector":21,"AT":22,".":23,"SKIPME":24,"..":25,"$accept":0,"$end":1},
+terminals_: {2:"error",4:"$",8:"PROPERTY",10:"[",11:"?",12:"(",14:")",15:"]",16:"*",17:"OR",18:"AND",20:"NUMBER",22:"AT",23:".",24:"SKIPME",25:".."},
+productions_: [0,[3,2],[3,1],[5,2],[5,1],[6,3],[6,2],[9,6],[9,3],[13,3],[13,3],[13,3],[13,1],[19,1],[19,1],[21,3],[21,4],[7,1],[7,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
-return {type: "$", paths: $$[$0]}; 
+return {paths: $$[$0]}; 
 break;
 case 2:
-return {type: "$"}; 
+return {paths: []}; 
 break;
 case 3:
  this.$ = [$$[$0-1], ...$$[$0]]; 
@@ -105,19 +105,65 @@ case 7:
  this.$ = $$[$0-2] 
 break;
 case 8:
- this.$ = {type: "all"} 
+ this.$ = {type: 'all'} 
 break;
 case 9:
- this.$ = {type: "op", value: $$[$0-1], args:[$$[$0-2], $$[$0]]}; 
+ this.$ = (function(e1, e2){
+                console.log("-------------------------------------------------------------------");
+                console.log("OR!", e1,e2);
+                const isOrOp = (e) => e.type=='expr_bool' && e.op=='OR' && !e.priority;
+                const isExpr = e => e.type!='exp_bool';
+                if(isOrOp(e1) && isOrOp(e2)){
+                    e1.args = [...e1.args, ...e2.args];
+                    console.log("e1 and e2 is OR, merge args", e1);
+                    return e1;
+                }else if(isOrOp(e1) && isExpr(e2)) {
+                    e1.args.push(e2);
+                    console.log("e1 is OR and e2 is expr, add e2 to e1.args", e1);
+                    return e1;
+                }else if(isExpr(e1) && isOrOp(e2)){
+                    e2.args.push(e1);
+                    console.log("e2 is OR and e1 is expr, add e1 to e2.args", e1);
+                    return e2;
+                }else {
+                    console.log("nested");
+                return {type:'expr_bool', op:'OR', args:[$$[$0-2], $$[$0]]};
+                }  
+                
+            })($$[$0-2], $$[$0]) 
+        
 break;
 case 10:
- this.$ = $$[$0]; 
+ this.$ = (function(e1, e2){
+                console.log("-------------------------------------------------------------------");
+                console.log("AND!", e1,e2);
+                const isAndExpr = (e) => e.type=='expr_bool' && e.op=='AND' && !e.priority;
+                const isExpr = e => e.type!='exp_bool';
+                if(isAndExpr(e1) && isAndExpr(e2)){
+                    e1.args = [...e1.args, ...e2.args];
+                    console.log("e1 and e2 is AND, merge args", e1);
+                    return e1;
+                }else if(isAndExpr(e1) && isExpr(e2)) {
+                    e1.args.push(e2);
+                    console.log("e1 is AND and e2 is expr, add e2 to e1.args", e1);
+                    return e1;
+                }else if(isExpr(e1) && isAndExpr(e2)){
+                    e2.args.push(e1);
+                    console.log("e2 is AND and e1 is expr, add e1 to e2.args", e1);
+                    return e2;
+                }else {
+                    console.log("nested");
+                return {type:'expr_bool', op:'AND', args:[$$[$0-2], $$[$0]]};
+                }  
+                
+            })($$[$0-2], $$[$0]) 
+        
 break;
 case 11:
- this.$ = 'OR';
+ this.$ = {...$$[$0-1], priority: true} 
 break;
 case 12:
- this.$ = 'AND';
+ this.$ = $$[$0]; 
 break;
 case 13:
  this.$ = { type:'number', value:$$[$0]};
@@ -126,20 +172,20 @@ case 14:
  this.$ = $$[$0] 
 break;
 case 15:
- this.$ = {type: "selector", value:$$[$0]} 
+ this.$ = {type: 'selector', value:$$[$0]} 
 break;
 case 16:
- this.$ = {type: "selector", value:$$[$0-1]} 
+ this.$ = {type: 'selector', value:$$[$0-1]} 
 break;
 case 17:
- this.$ = "child";
+ this.$ = 'child';
 break;
 case 18:
- this.$ = "recursive";
+ this.$ = 'recursive';
 break;
 }
 },
-table: [{3:1,4:[1,2]},{1:[3]},{1:[2,2],5:3,6:4,7:5,24:$V0,26:$V1},{1:[2,1]},{1:[2,4],5:8,6:4,7:5,24:$V0,26:$V1},{8:[1,9]},{8:[2,17]},{8:[2,18]},{1:[2,3]},o($V2,[2,6],{9:10,10:[1,11]}),o($V2,[2,5]),{11:[1,12],16:[1,13]},{12:[1,14]},{15:[1,15]},{13:16,18:17,21:$V3,22:19,23:$V4,25:$V5},o($V2,[2,8]),{14:[1,22],17:23,19:$V6,20:$V7},o($V8,[2,10]),o($V8,[2,13]),o($V8,[2,14]),{24:[1,26]},{23:[1,27]},{15:[1,28]},{13:29,18:17,21:$V3,22:19,23:$V4,25:$V5},o($V9,[2,11]),o($V9,[2,12]),{8:[1,30]},{24:[1,31]},o($V2,[2,7]),{14:[2,9],17:23,19:$V6,20:$V7},o($V8,[2,15]),{8:[1,32]},o($V8,[2,16])],
+table: [{3:1,4:[1,2]},{1:[3]},{1:[2,2],5:3,6:4,7:5,23:$V0,25:$V1},{1:[2,1]},{1:[2,4],5:8,6:4,7:5,23:$V0,25:$V1},{8:[1,9]},{8:[2,17]},{8:[2,18]},{1:[2,3]},o($V2,[2,6],{9:10,10:[1,11]}),o($V2,[2,5]),{11:[1,12],16:[1,13]},{12:[1,14]},{15:[1,15]},{12:$V3,13:16,19:18,20:$V4,21:20,22:$V5,24:$V6},o($V2,[2,8]),{14:[1,23],17:$V7,18:$V8},{12:$V3,13:26,19:18,20:$V4,21:20,22:$V5,24:$V6},o($V9,[2,12]),o($V9,[2,13]),o($V9,[2,14]),{23:[1,27]},{22:[1,28]},{15:[1,29]},{12:$V3,13:30,19:18,20:$V4,21:20,22:$V5,24:$V6},{12:$V3,13:31,19:18,20:$V4,21:20,22:$V5,24:$V6},{14:[1,32],17:$V7,18:$V8},{8:[1,33]},{23:[1,34]},o($V2,[2,7]),o($V9,[2,9]),o([14,18],[2,10],{17:$V7}),o($V9,[2,11]),o($V9,[2,15]),{8:[1,35]},o($V9,[2,16])],
 defaultActions: {3:[2,1],6:[2,17],7:[2,18],8:[2,3]},
 parseError: function parseError (str, hash) {
     if (hash.recoverable) {
@@ -615,19 +661,19 @@ options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return "DOLLAR"
+case 0:return "$"
 break;
-case 1:return "DOT_DOT"
+case 1:return ".."
 break;
-case 2:return "DOT"
+case 2:return "."
 break;
-case 3:return "OPEN_SQUARE_BRACKET"
+case 3:return "["
 break;
-case 4:return "CLOSE_SQUARE_BRACKET"
+case 4:return "]"
 break;
-case 5:return "OPEN_ROUND_BRACKET"
+case 5:return "("
 break;
-case 6:return "CLOSE_ROUND_BRACKET"
+case 6:return ")"
 break;
 case 7:return "NUMBER"
 break;
@@ -635,15 +681,15 @@ case 8:return "OR"
 break;
 case 9:return "AND"
 break;
-case 10:return "QUESTION_MARK" 
+case 10:return "?" 
 break;
-case 11:return "OPEN_ROUND_BRACKET"
+case 11:return "("
 break;
-case 12:return "CLOSE_RUOUND_BRACKET"
+case 12:return ")"
 break;
 case 13:return "AT"
 break;
-case 14:return "ASTERISK"
+case 14:return "*"
 break;
 case 15:return "PROPERTY"
 break;
