@@ -25,6 +25,7 @@
 "<=" return "<="
 ">=" return ">="
 "==" return "=="
+"!=" return "!="
 //"'" return "QUOTE"
 \'[a-zA-Z0-9\s]+\' return "STRING"
 
@@ -33,14 +34,18 @@
 %left AND
 %left OR
 
+
 %start jsonpath
 %%
+
+
 jsonpath
     : '$' paths
         {return {paths: $paths}; }
     | '$'
         {return {paths: []}; }
     ;
+
 
 paths
     : path paths
@@ -50,6 +55,7 @@ paths
      }
     ;
 
+
 path
     : sep NODE filter
         { $$ =   {type:'path', sep: $sep, node: $NODE, filter: $filter}  }
@@ -58,15 +64,17 @@ path
      }
     ;
 
+
 filter
-    : '[' '?' '(' expr ')' ']'
-        { $$ = $expr }
+    : '[' '?' '(' expr_bool ')' ']'
+        { $$ = $expr_bool }
     | '[' '*' ']'
         { $$ = null }
     ;
 
-expr
-    : expr OR expr
+
+expr_bool
+    : expr_bool OR expr_bool
         { $$ = (function(e1, e2){
                 const isOrOp = (e) => e.type=='expr_bool' && e.op=='OR' && !e.priority;
                 const isExpr = e => e.type!='exp_bool';
@@ -85,7 +93,7 @@ expr
                 
             })($1, $3) 
         }
-    | expr AND expr
+    | expr_bool AND expr_bool
         { $$ = (function(e1, e2){
                 const isAndExpr = (e) => e.type=='expr_bool' && e.op=='AND' && !e.priority;
                 const isExpr = e => e.type!='exp_bool';
@@ -104,11 +112,12 @@ expr
                 
             })($1, $3);
         }
-    | '(' expr ')'
-        { $$ = {...$expr, priority: true} }
-    | compare
+    | '(' expr_bool ')'
+        { $$ = {...$expr_bool, priority: true} }
+    | expr_compare
         { $$ = $1; }
     ;
+
 
 sep
     : '.'
@@ -117,19 +126,23 @@ sep
         { $$ = '..';}
     ;
 
-compare
+
+expr_compare
     : value '==' value  
-        { $$ = { op: 'compare', compare: $2, args:[$1, $3] }; }
+        { $$ = { type: 'expr_compare', op: $2, args:[$1, $3] }; }
     | value '>' value  
-        { $$ = { op: 'compare', compare: $2, args:[$1, $3] }; }
+        { $$ = { type: 'expr_compare', op: $2, args:[$1, $3] }; }
     | value '<' value  
-        { $$ = { op: 'compare', compare: $2, args:[$1, $3] }; }
+        { $$ = { type: 'expr_compare', op: $2, args:[$1, $3] }; }
     | value '>=' value  
-        { $$ = { op: 'compare', compare: $2, args:[$1, $3] }; }
+        { $$ = { type: 'expr_compare', op: $2, args:[$1, $3] }; }
     | value '<=' value  
-        { $$ = { op: 'compare', compare: $2, args:[$1, $3] }; }
+        { $$ = { type: 'expr_compare', op: $2, args:[$1, $3] }; }
+    | value '!=' value  
+        { $$ = { type: 'expr_compare', op: $2, args:[$1, $3] }; }
     | value
     ;
+
 
 value
     : NUMBER 
