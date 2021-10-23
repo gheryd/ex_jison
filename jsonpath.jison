@@ -52,7 +52,6 @@ paths
         { $$ = [$path, ...$paths]; }
     | path
         { $$ = [$path];}
-     }
     ;
 
 
