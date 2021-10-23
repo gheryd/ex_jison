@@ -1,4 +1,4 @@
-#json path parse with jison
+# Jison configuration for JsonPath
 
 ### Required
 https://github.com/zaach/jison
