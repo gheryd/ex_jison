@@ -1,6 +1,14 @@
 const parser = require("./jsonpath").parser;
 
-const jsonpath = `$..[?(@.nodeA||(@.nodeB&&@.nodeB))]`;
+const examples = {
+    0: `$..prop[*]`,
+    1: `$.prop[?(@.nodeA||@.nodeB||@.nodeC)]`,
+    2: `$..prop1[?(@.nodeA||@.nodeB&& @.nodeC)]`,
+    3: `$..prop1[?(@.nodeA||@.nodeB&& @.nodeC)].prop2[*].prop3`,
+    4: `$..prop1[?(@.nodeA||@.nodeB&& @.nodeC)].prop2[?(@.prop4)].prop3`,
+};
+
+const jsonpath = examples[1];
 
 const parsed = parser.parse(jsonpath);
 
