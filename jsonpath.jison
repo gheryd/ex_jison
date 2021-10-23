@@ -16,10 +16,10 @@
 ")" return ")"
 "@" return "AT"
 "*" return "*"
+"true" return "TRUE"
+"false" return "FALSE"
+\'[a-zA-Z0-9\s]+\' return "STRING"
 [a-zA-Z0-9]+\b return "NODE"
-// \s+ return "SKIPME"
-"true" return "true"
-"false" return "false"
 "<" return "<"
 ">" return ">"
 "<=" return "<="
@@ -27,7 +27,7 @@
 "==" return "=="
 "!=" return "!="
 //"'" return "QUOTE"
-\'[a-zA-Z0-9\s]+\' return "STRING"
+
 
 /lex
 
@@ -147,8 +147,18 @@ expr_compare
 value
     : NUMBER 
         { $$ = {type: "number", value: $1}; }
-    | AT '.' NODE 
-        { $$ = {type: 'node', value: $3} }
+    | TRUE
+        { $$ = {type: "bool", value: true};}
+    | FALSE
+        { $$ = {type: "bool", value: false};}
+    | selector
+        { $$ = $1 }
     | STRING
         { $$ = {type: "string", value: $1};}
+    
+    ;
+
+selector
+    : AT '.' NODE 
+        { $$ = {type: 'node', value: $3} }
     ;

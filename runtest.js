@@ -17,9 +17,10 @@ examples[++i] =  `$.prop[?(@.nodeA>@.nodeB)]`;
 examples[++i] =  `$.prop[?(@.nodeA>10)]`;
 examples[++i] =  `$.prop[?(@.nodeA>10 && @.nodeB==@.nodeC)]`;
 examples[++i] =  `$.prop[?(@.nodeA>10 && @.nodeB=='ci ao a')].nodeC[*]`;
-examples[++i] =  `$.prop[?(@.nodeA>10 && @.nodeB!='ci ao a')].nodeC[*]`
+examples[++i] =  `$.prop[?(@.nodeA>10 && @.nodeB!='ci ao a')].nodeC[*]`;
+examples[++i] =  `$.prop[?(@.nodeA>10 && @.nodeB==false)].nodeC[*]`
 
-const jsonpath = examples[14];
+const jsonpath = examples[15];
 
 console.log();
 console.log(jsonpath);
